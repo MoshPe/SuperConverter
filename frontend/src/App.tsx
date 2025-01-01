@@ -1,20 +1,23 @@
 import {useState} from 'react';
-import {Box, Button, Center, Input, Text} from "@chakra-ui/react";
+import {Box, Button, Center, Text} from "@chakra-ui/react";
 import Select from "react-select";
 import './App.css';
 import makeAnimated from 'react-select/animated';
 import {ConvertDistanceUnit} from "../wailsjs/go/main/App";
+import SingleValue from "./components/SingleValue";
+import GeoComponent from "./components/GeoComponent";
 
 const animatedComponents = makeAnimated();
 
 const ConverterApp = () => {
     const [inputValue, setInputValue] = useState<string>("");
-    const [unit, setUnit] = useState<"km" | "miles">("km");
+    const [unit, setUnit] = useState<"km" | "miles" | "geo">("km");
     const [result, setResult] = useState<string>("");
 
     const options = [
         {value: 'km', label: 'Kilometers to Miles'},
-        {value: 'miles', label: 'Miles to Kilometers'}
+        {value: 'miles', label: 'Miles to Kilometers'},
+        {value: 'geo', label: 'Geographic Geographic'},
     ]
 
     const customStyles = {
@@ -36,11 +39,6 @@ const ConverterApp = () => {
             return;
         }
         let convertedValue: string;
-        // if (unit === "km") {
-        //     convertedValue = `${(parseFloat(inputValue) * 0.621371).toFixed(2)} miles`;
-        // } else {
-        //     convertedValue = `${(parseFloat(inputValue) * 1.60934).toFixed(2)} km`;
-        // }
         convertedValue = (await ConvertDistanceUnit(parseFloat(inputValue), unit)).Str
         setResult(convertedValue);
     };
@@ -48,24 +46,23 @@ const ConverterApp = () => {
     return (
         <Center h="100vh" bg="gray.50">
             <Box p={8} boxShadow="lg" borderRadius="md" bg="white" width="400px">
-                <Text fontSize="2xl" mb={4} textAlign="center" fontWeight="bold" color="black">
+                <Text className={"text-shared text-converter"}>
                     Simple Converter
                 </Text>
                 <Select onChange={(newValue: any) => setUnit(newValue.value)} styles={customStyles} required={true}
                         components={animatedComponents}
                         options={options}></Select>
-                <Input
-                    color="black"
-                    placeholder="Enter value"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    mb={4}
-                />
-                <Button colorScheme="blue" width="100%" onClick={handleConvert}>
+                {unit === "geo" && (
+                    <GeoComponent unit={unit} inputValue={inputValue} setInputValue={setInputValue}/>
+                )}
+                {(unit === "miles" || unit === "km") && (
+                    <SingleValue unit={unit} inputValue={inputValue} setInputValue={setInputValue}  />
+                )}
+                <Button colorScheme="light" width="100%" onClick={handleConvert}>
                     Convert
                 </Button>
                 {result && (
-                    <Text color={"black"} mt={4} textAlign="center" fontSize="lg" fontWeight="medium">
+                    <Text className={"text-shared text-result"}>
                         Result: {result}
                     </Text>
                 )}
