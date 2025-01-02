@@ -1,4 +1,4 @@
-package internal
+package main
 
 import (
 	"fmt"
@@ -25,9 +25,18 @@ type DmsAngle struct {
 	Sec float64
 	Str string
 }
+type DmmAngle struct {
+	Deg int
+	Min float64
+	Str string
+}
 type Dms struct {
 	LatNS DmsAngle
 	LonWE DmsAngle
+}
+type Dmm struct {
+	LatNS DmmAngle
+	LonWE DmmAngle
 }
 
 type ECEF struct {
@@ -41,7 +50,7 @@ var (
 	RadUnit u.Unit
 )
 
-func init() {
+func Init() {
 	DegUnit = u.NewUnit("Degree", "deg")
 	RadUnit = u.NewUnit("Radian", "rad")
 	u.NewConversionFromFn(DegUnit, RadUnit, func(val float64) float64 {
@@ -52,10 +61,10 @@ func init() {
 	}, "Radians  × (180/π)")
 }
 
-func ConvertGeoToDms(geo Geo) Dms {
+func (a *App) ConvertGeoToDms(geo Geo) Dms {
+	fmt.Println("Convert Geo to Dms")
 	latDeg, latMin, latSec, latDir := latLonToDMS(geo.Lat, Latitude)
 	lngDeg, lngMin, lngSec, lngDir := latLonToDMS(geo.Lng, Longitude)
-
 	return Dms{
 		LatNS: DmsAngle{
 			Deg: latDeg,
@@ -72,8 +81,9 @@ func ConvertGeoToDms(geo Geo) Dms {
 	}
 }
 
-func ConvertDmsToGeo(dms Dms) Geo {
+func (a *App) ConvertDmsToGeo(dms Dms) Geo {
 	latDecimal := float64(dms.LatNS.Deg) + float64(dms.LatNS.Min)/60 + dms.LatNS.Sec/3600
+	fmt.Println(dms)
 	if dms.LatNS.Str == "S" {
 		latDecimal = -latDecimal
 	}
@@ -90,9 +100,65 @@ func ConvertDmsToGeo(dms Dms) Geo {
 	}
 }
 
-func ConvertGeoToECEF(geo Geo) ECEF {
+func (a *App) ConvertDmsToDmm(dms Dms) Dmm {
+	return Dmm{
+		LatNS: DmmAngle{
+			Deg: dms.LatNS.Deg,
+			Min: float64(dms.LatNS.Min) + (dms.LatNS.Sec / 60),
+			Str: dms.LatNS.Str,
+		},
+		LonWE: DmmAngle{
+			Deg: dms.LonWE.Deg,
+			Min: float64(dms.LonWE.Min) + (dms.LonWE.Sec / 60),
+			Str: dms.LonWE.Str,
+		},
+	}
+}
+
+func (a *App) ConvertGeoToDmm(geo Geo) Dmm {
+	dms := a.ConvertGeoToDms(geo)
+	return a.ConvertDmsToDmm(dms)
+}
+
+func (a *App) ConvertEcefToDmm(ecef ECEF) Dmm {
+	dms := a.ConvertEcefToDms(ecef)
+	return a.ConvertDmsToDmm(dms)
+}
+
+func (a *App) ConvertDmmToDms(dmm Dmm) Dms {
+
+	latMinutes := int(dmm.LatNS.Min)
+	lonMinutes := int(dmm.LonWE.Min)
+
+	return Dms{
+		LatNS: DmsAngle{
+			Deg: dmm.LatNS.Deg,
+			Min: latMinutes,
+			Sec: math.Round(dmm.LatNS.Min-float64(latMinutes)) * 60,
+			Str: dmm.LatNS.Str,
+		},
+		LonWE: DmsAngle{
+			Deg: dmm.LonWE.Deg,
+			Min: lonMinutes,
+			Sec: math.Round(dmm.LonWE.Min-float64(lonMinutes)) * 60,
+			Str: dmm.LonWE.Str,
+		},
+	}
+}
+
+func (a *App) ConverDmmToGeo(dmm Dmm) Geo {
+	dms := a.ConvertDmmToDms(dmm)
+	return a.ConvertDmsToGeo(dms)
+}
+
+func (a *App) ConvertDmmToEcef(dmm Dmm) ECEF {
+	dms := a.ConvertDmmToDms(dmm)
+	return a.ConvertDmsToEcef(dms)
+}
+
+func (a *App) ConvertGeoToECEF(geo Geo) ECEF {
 	// WGS84 ellipsoid parameters
-	a := 6378137.0           // Semi-major axis (meters)
+	sma := 6378137.0         // Semi-major axis (meters)
 	f := 1.0 / 298.257223563 // Flattening
 	e2 := 2*f - f*f          // Eccentricity squared
 
@@ -101,7 +167,7 @@ func ConvertGeoToECEF(geo Geo) ECEF {
 	lonRad := geo.Lng * math.Pi / 180.0
 
 	// Calculate the prime vertical radius of curvature
-	N := a / math.Sqrt(1-e2*math.Sin(latRad)*math.Sin(latRad))
+	N := sma / math.Sqrt(1-e2*math.Sin(latRad)*math.Sin(latRad))
 
 	// Calculate ECEF coordinates
 	X := (N + geo.Alt) * math.Cos(latRad) * math.Cos(lonRad)
@@ -115,9 +181,9 @@ func ConvertGeoToECEF(geo Geo) ECEF {
 	}
 }
 
-func ConvertECEFToGeo(ecef ECEF) Geo {
+func (a *App) ConvertECEFToGeo(ecef ECEF) Geo {
 	// WGS84 ellipsoid parameters
-	a := 6378137.0           // Semi-major axis (meters)
+	sma := 6378137.0         // Semi-major axis (meters)
 	f := 1.0 / 298.257223563 // Flattening
 	e2 := 2*f - f*f          // Eccentricity squared
 
@@ -129,13 +195,13 @@ func ConvertECEFToGeo(ecef ECEF) Geo {
 	lat := math.Atan2(ecef.Z, rho*(1-e2)) // Initial approximation for latitude
 
 	// Iteratively refine latitude using Newton's method
-	N := a / math.Sqrt(1-e2*math.Sin(lat)*math.Sin(lat))
+	N := sma / math.Sqrt(1-e2*math.Sin(lat)*math.Sin(lat))
 	alt := rho/math.Cos(lat) - N
 
 	// Start refining latitude using an iterative method
 	for {
 		// Update N and altitude
-		N = a / math.Sqrt(1-e2*math.Sin(lat)*math.Sin(lat))
+		N = sma / math.Sqrt(1-e2*math.Sin(lat)*math.Sin(lat))
 		newLat := math.Atan2(ecef.Z+e2*N*math.Sin(lat), rho)
 
 		// Check for convergence (if the latitude does not change significantly, break the loop)
@@ -157,14 +223,14 @@ func ConvertECEFToGeo(ecef ECEF) Geo {
 	}
 }
 
-func ConvertDmsToEcef(dms Dms) ECEF {
-	geo := ConvertDmsToGeo(dms)
-	return ConvertGeoToECEF(geo)
+func (a *App) ConvertDmsToEcef(dms Dms) ECEF {
+	geo := a.ConvertDmsToGeo(dms)
+	return a.ConvertGeoToECEF(geo)
 }
 
-func ConvertEcefToDms(ecef ECEF) Dms {
-	geo := ConvertECEFToGeo(ecef)
-	return ConvertGeoToDms(geo)
+func (a *App) ConvertEcefToDms(ecef ECEF) Dms {
+	geo := a.ConvertECEFToGeo(ecef)
+	return a.ConvertGeoToDms(geo)
 }
 
 func latLonToDMS(degrees float64, geoType GeoCoordinate) (int, int, float64, string) {

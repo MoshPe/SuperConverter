@@ -1,4 +1,4 @@
-package internal
+package main
 
 import (
 	u "github.com/bcicen/go-units"
@@ -21,8 +21,9 @@ func TestConversionValues(t *testing.T) {
 //}
 
 func TestConvertGeoToDms(t *testing.T) {
+	app := &App{}
 	lat, lon := 56.543483, 59.687450
-	dms := ConvertGeoToDms(Geo{
+	dms := app.ConvertGeoToDms(Geo{
 		Lat: lat,
 		Lng: lon,
 		Alt: 0,
@@ -38,6 +39,7 @@ func TestConvertGeoToDms(t *testing.T) {
 }
 
 func TestConvertDmsToGeo(t *testing.T) {
+	app := &App{}
 	// 47.087345, 20.689055
 	dms := Dms{
 		LatNS: DmsAngle{
@@ -53,7 +55,7 @@ func TestConvertDmsToGeo(t *testing.T) {
 			Str: "20°41'20.6\"E",
 		},
 	}
-	geo := ConvertDmsToGeo(dms)
+	geo := app.ConvertDmsToGeo(dms)
 	assert.Equal(t, 47.08733333333333, geo.Lat)
 	assert.Equal(t, 20.689055555555555, geo.Lng)
 }

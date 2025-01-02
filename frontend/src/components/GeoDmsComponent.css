@@ -27,6 +27,13 @@ button:hover {
     display: flex;
 }
 
+.dms-inputs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+}
+
 /*fontSize="2xl" mb={4} textAlign="center" fontWeight="bold" color="black"*/
 
 

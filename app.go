@@ -11,11 +11,6 @@ var (
 	Miles u.Unit
 )
 
-// App struct
-type App struct {
-	ctx context.Context
-}
-
 // NewApp creates a new App application struct
 func NewApp() *App {
 	return &App{}
@@ -27,15 +22,7 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	KM = u.KiloMeter
 	Miles = u.Mile
-}
-
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
-}
-
-func (a *App) Say(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
+	Init()
 }
 
 type UnitValue struct {
