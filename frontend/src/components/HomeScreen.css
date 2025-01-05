@@ -1,0 +1,65 @@
+/* HomeScreen.css */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #1b1f3a, #2a5298);
+    color: #fff;
+}
+
+.home-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+}
+
+.hero {
+    max-width: 600px;
+    padding: 20px;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.description {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    text-decoration: none;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.simple-button {
+    background-color: #4caf50;
+    color: #fff;
+}
+
+.simple-button:hover {
+    background-color: #45a049;
+}
+
+.advanced-button {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.advanced-button:hover {
+    background-color: #e53935;
+}

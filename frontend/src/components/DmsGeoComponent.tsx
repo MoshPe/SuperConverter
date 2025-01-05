@@ -260,6 +260,7 @@ export default function DmsGeoComponent(props: ConvertProps) {
                         <Field.Label css={floatingStyles}>Minutes</Field.Label>
                     </Box>
                     <Box pos="relative">
+                        <InputElement placement={"end"} zIndex="0">"</InputElement>
                         <Input
                             type="number"
                             className={"peer"}

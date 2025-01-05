@@ -1,0 +1,35 @@
+#CesiumMap {
+    position: relative; /* This allows absolute positioning of child */
+    width: 100%; /* Full width of the parent */
+    height: 90vh; /* Full height of the viewport */
+}
+
+.CesiumMap {
+    width: 100%;  /* Full width of its parent container */
+    height: 100%;  /* Full height of its parent container */
+}
+
+.cesiumMapContainer {
+    display: block;
+    position: absolute; /* Position relative to parent container */
+    top: 0;
+    right: 0;  /* Move the container to the right side of the screen */
+    width: 50%;  /* Takes up half the width of the parent container */
+    height: 100%;  /* Full height */
+}
+
+.measure-button {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    background-color: #28a745;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 100;
+}
+
+.measure-button:hover {
+    background-color: #218838;
+}
