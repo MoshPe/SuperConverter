@@ -20,6 +20,35 @@ func TestConversionValues(t *testing.T) {
 //
 //}
 
+func TestApp_ConvertGeoToECEF(t *testing.T) {
+	app := &App{}
+	lat, lon, alt := 35.1, 31.1, 250.0
+
+	ecef := app.ConvertGeoToECEF(Geo{
+		Lat: lat,
+		Lng: lon,
+		Alt: alt,
+	})
+
+	assert.Equal(t, 4473361.97, ecef.X)
+	assert.Equal(t, 2698504.46, ecef.Y)
+	assert.Equal(t, 3647092.90, ecef.Z)
+}
+
+func TestApp_ConvertGeoToECEF2(t *testing.T) {
+	app := &App{}
+
+	geo := app.ConvertECEFToGeo(ECEF{
+		X: 4473361.97,
+		Y: 2698504.46,
+		Z: 3647092.90,
+	})
+
+	assert.Equal(t, 35.1000000, geo.Lat)
+	assert.Equal(t, 31.1000000, geo.Lng)
+	assert.Equal(t, 250.00, geo.Alt)
+}
+
 func TestConvertGeoToDms(t *testing.T) {
 	app := &App{}
 	lat, lon := 56.543483, 59.687450

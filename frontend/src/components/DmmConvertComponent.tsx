@@ -1,16 +1,25 @@
-import {Box, defineStyle, Field, Input, InputElement, NativeSelectField, NativeSelectRoot,} from "@chakra-ui/react";
-import './GeoDmsComponent.css'
+import {Box, defineStyle, Field, Input, InputElement,} from "@chakra-ui/react";
+import './GeoConvertComponent.css'
 import React, {useCallback, useEffect, useState} from "react";
-import {ConvertProps, DmsAngle} from "./types";
-import {ConvertDmsToGeo} from "../../wailsjs/go/main/App";
+import {ConvertProps} from "./types";
+import {ConvertDmmToDms, ConvertDmmToEcef, ConvertDmmToGeo, ConvertDmsToDmm} from "../../wailsjs/go/main/App";
 import {main} from "../../wailsjs/go/models";
 import Switch from "react-switch";
 import Geo = main.Geo;
 import Dms = main.Dms;
+import ECEF = main.ECEF;
+import Dmm = main.Dmm;
+import DmmAngle = main.DmmAngle;
 
-export default function DmsGeoComponent(props: ConvertProps) {
-    const [latNS, setLatNS] = useState<DmsAngle>({} as DmsAngle);
-    const [lonWE, setLonWE] = useState<DmsAngle>({} as DmsAngle);
+const enum DmmConvertType {
+    Geo = 'dmm_geo',
+    ECEF = 'dmm_ecef',
+    Dms = 'dmm_dms',
+}
+
+export default function DmmConvertComponent(props: ConvertProps) {
+    const [latNS, setLatNS] = useState<DmmAngle>({} as DmmAngle);
+    const [lonWE, setLonWE] = useState<DmmAngle>({} as DmmAngle);
     const [isLatNSChecked, setIsLatNSChecked] = useState(false);
     const [isLonWEChecked, setIsLonWEChecked] = useState(false);
 
@@ -55,10 +64,26 @@ export default function DmsGeoComponent(props: ConvertProps) {
             },
         });
 
-        const convertedValue: Geo = (
-            await ConvertDmsToGeo(dms)
-        );
-        props.setResult(`Latitude: ${convertedValue.Lat} \n Longitude: ${convertedValue.Lng} \n Altitude: ${convertedValue.Alt}`);
+        let convertedValue: Geo | Dmm | ECEF;
+
+        switch (props.unit) {
+            case DmmConvertType.Geo:
+                convertedValue = await ConvertDmmToGeo(dms);
+                props.setResult(`Latitude: ${convertedValue.Lat}\n Longitude: ${convertedValue.Lng}\n Altitude: ${convertedValue.Alt}`);
+                break;
+            case DmmConvertType.ECEF:
+                convertedValue =  await ConvertDmmToEcef(dms);
+                props.setResult(`X: ${convertedValue.X}\n Y: ${convertedValue.Y}\n Z: ${convertedValue.Z}`);
+                break;
+            case DmmConvertType.Dms:
+                convertedValue =  await ConvertDmmToDms(dms);
+                props.setResult(`${convertedValue.LatNS.Str}\n ${convertedValue.LonWE.Str}`);
+                break;
+            default:
+                props.setResult(`Selected unit is not supported`);
+                break;
+        }
+
     }, [isLatNSChecked, isLonWEChecked, latNS, lonWE, props.unit]);
 
     useEffect(() => {
@@ -156,22 +181,6 @@ export default function DmsGeoComponent(props: ConvertProps) {
                         />
                         <Field.Label css={floatingStyles}>Minutes</Field.Label>
                     </Box>
-                    <Box pos="relative">
-                        <InputElement placement={"end"} zIndex="0">"</InputElement>
-                        <Input
-                            type="number"
-                            className={"peer"}
-                            color={"black"}
-                            placeholder=""
-                            onChange={(e) => {
-                                latNS.Sec = parseFloat(e.target.value)
-                                setLatNS(latNS)
-                            }}
-                            mb={5}
-                            mt={5}
-                        />
-                        <Field.Label css={floatingStyles}>Seconds</Field.Label>
-                    </Box>
                 </div>
                 <div className={"dms-inputs"}>
                     <span className={"value-text text-shared"}>West-East (Longitude)</span>
@@ -258,22 +267,6 @@ export default function DmsGeoComponent(props: ConvertProps) {
                             mt={5}
                         />
                         <Field.Label css={floatingStyles}>Minutes</Field.Label>
-                    </Box>
-                    <Box pos="relative">
-                        <InputElement placement={"end"} zIndex="0">"</InputElement>
-                        <Input
-                            type="number"
-                            className={"peer"}
-                            color={"black"}
-                            placeholder=""
-                            onChange={(e) => {
-                                lonWE.Sec = parseFloat(e.target.value)
-                                setLonWE(lonWE)
-                            }}
-                            mb={5}
-                            mt={5}
-                        />
-                        <Field.Label css={floatingStyles}>Seconds</Field.Label>
                     </Box>
                 </div>
             </Box>

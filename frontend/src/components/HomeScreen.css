@@ -1,11 +1,4 @@
 /* HomeScreen.css */
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to bottom, #1b1f3a, #2a5298);
-    color: #fff;
-}
-
 .home-container {
     display: flex;
     justify-content: center;

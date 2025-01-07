@@ -50,10 +50,50 @@ func (a *App) ConvertDistanceUnit(value float64, unitName string) UnitValue {
 				Str: "",
 			}
 		}
-	} else {
+	} else if unit.Name == Miles.Name {
 		val, err = u.ConvertFloat(value, unit, KM)
 		if err != nil {
 			fmt.Println("error converting Miles to KM")
+			return UnitValue{
+				Val: 0,
+				Str: "",
+			}
+		}
+	} else if unit.Name == KM.Name {
+	}
+
+	switch unit.Name {
+	case KM.Name:
+		val, err = u.ConvertFloat(value, unit, Miles)
+		if err != nil {
+			fmt.Println("error converting KM to Miles")
+			return UnitValue{
+				Val: 0,
+				Str: "",
+			}
+		}
+	case Miles.Name:
+		val, err = u.ConvertFloat(value, unit, KM)
+		if err != nil {
+			fmt.Println("error converting Miles to KM")
+			return UnitValue{
+				Val: 0,
+				Str: "",
+			}
+		}
+	case RadUnit.Name:
+		val, err = u.ConvertFloat(value, unit, DegUnit)
+		if err != nil {
+			fmt.Println("error converting Rad to Degree")
+			return UnitValue{
+				Val: 0,
+				Str: "",
+			}
+		}
+	case DegUnit.Name:
+		val, err = u.ConvertFloat(value, unit, RadUnit)
+		if err != nil {
+			fmt.Println("error converting Deg to Rad")
 			return UnitValue{
 				Val: 0,
 				Str: "",

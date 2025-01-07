@@ -20,10 +20,11 @@ const (
 )
 
 type DmsAngle struct {
-	Deg int
-	Min int
-	Sec float64
-	Str string
+	Deg       int
+	Min       int
+	Sec       float64
+	direction string
+	Str       string
 }
 type DmmAngle struct {
 	Deg int
@@ -63,20 +64,22 @@ func Init() {
 
 func (a *App) ConvertGeoToDms(geo Geo) Dms {
 	fmt.Println("Convert Geo to Dms")
-	latDeg, latMin, latSec, latDir := latLonToDMS(geo.Lat, Latitude)
-	lngDeg, lngMin, lngSec, lngDir := latLonToDMS(geo.Lng, Longitude)
+	latDeg, latMin, latSec, latDir, latDirection := latLonToDMS(geo.Lat, Latitude)
+	lngDeg, lngMin, lngSec, lngDir, lngDirection := latLonToDMS(geo.Lng, Longitude)
 	return Dms{
 		LatNS: DmsAngle{
-			Deg: latDeg,
-			Min: latMin,
-			Sec: latSec,
-			Str: latDir,
+			Deg:       latDeg,
+			Min:       latMin,
+			Sec:       latSec,
+			Str:       latDir,
+			direction: latDirection,
 		},
 		LonWE: DmsAngle{
-			Deg: lngDeg,
-			Min: lngMin,
-			Sec: lngSec,
-			Str: lngDir,
+			Deg:       lngDeg,
+			Min:       lngMin,
+			Sec:       lngSec,
+			Str:       lngDir,
+			direction: lngDirection,
 		},
 	}
 }
@@ -105,12 +108,12 @@ func (a *App) ConvertDmsToDmm(dms Dms) Dmm {
 		LatNS: DmmAngle{
 			Deg: dms.LatNS.Deg,
 			Min: float64(dms.LatNS.Min) + (dms.LatNS.Sec / 60),
-			Str: dms.LatNS.Str,
+			Str: fmt.Sprintf("%d°%f'%s", dms.LatNS.Deg, float64(dms.LatNS.Min)+(dms.LatNS.Sec/60), dms.LatNS.direction),
 		},
 		LonWE: DmmAngle{
 			Deg: dms.LonWE.Deg,
 			Min: float64(dms.LonWE.Min) + (dms.LonWE.Sec / 60),
-			Str: dms.LonWE.Str,
+			Str: fmt.Sprintf("%d°%f'%s", dms.LonWE.Deg, float64(dms.LonWE.Min)+(dms.LonWE.Sec/60), dms.LonWE.direction),
 		},
 	}
 }
@@ -146,7 +149,7 @@ func (a *App) ConvertDmmToDms(dmm Dmm) Dms {
 	}
 }
 
-func (a *App) ConverDmmToGeo(dmm Dmm) Geo {
+func (a *App) ConvertDmmToGeo(dmm Dmm) Geo {
 	dms := a.ConvertDmmToDms(dmm)
 	return a.ConvertDmsToGeo(dms)
 }
@@ -157,6 +160,7 @@ func (a *App) ConvertDmmToEcef(dmm Dmm) ECEF {
 }
 
 func (a *App) ConvertGeoToECEF(geo Geo) ECEF {
+	fmt.Println(geo)
 	// WGS84 ellipsoid parameters
 	sma := 6378137.0         // Semi-major axis (meters)
 	f := 1.0 / 298.257223563 // Flattening
@@ -167,7 +171,7 @@ func (a *App) ConvertGeoToECEF(geo Geo) ECEF {
 	lonRad := geo.Lng * math.Pi / 180.0
 
 	// Calculate the prime vertical radius of curvature
-	N := sma / math.Sqrt(1-e2*math.Sin(latRad)*math.Sin(latRad))
+	N := sma / math.Sqrt(1-(e2*math.Pow(math.Sin(latRad), 2)))
 
 	// Calculate ECEF coordinates
 	X := (N + geo.Alt) * math.Cos(latRad) * math.Cos(lonRad)
@@ -233,7 +237,7 @@ func (a *App) ConvertEcefToDms(ecef ECEF) Dms {
 	return a.ConvertGeoToDms(geo)
 }
 
-func latLonToDMS(degrees float64, geoType GeoCoordinate) (int, int, float64, string) {
+func latLonToDMS(degrees float64, geoType GeoCoordinate) (int, int, float64, string, string) {
 	// Determine direction (N/S for latitude, E/W for longitude)
 	var direction string
 	if geoType == Latitude {
@@ -251,15 +255,16 @@ func latLonToDMS(degrees float64, geoType GeoCoordinate) (int, int, float64, str
 	}
 
 	// Extract the degrees, minutes, and seconds
-	deg := int(degrees)
-	minutes := (degrees - float64(deg)) * 60
-	m := int(minutes)
-	seconds := (minutes - float64(m)) * 60
+	degAbs := math.Abs(degrees)
+	deg := math.Floor(degAbs)
+	minutes := (degAbs - deg) * 60
+	m := math.Floor(minutes)
+	seconds := (minutes - m) * 60
 	sec := seconds
 
 	// Format the result as DMS string
-	dmsString := fmt.Sprintf("%d°%d'%f\"%s", deg, m, sec, direction)
+	dmsString := fmt.Sprintf("%d° %d' %f\"%s", int(deg), int(m), sec, direction)
 
 	// Return both DMS string and the decimal degree (original value)
-	return deg, m, sec, dmsString
+	return int(deg), int(m), sec, dmsString, direction
 }

@@ -20,12 +20,24 @@ const CesiumMap = () => {
             animation: false,
             sceneModePicker: false,
             navigationHelpButton: true,
-            infoBox: true,
-            selectionIndicator: true,
+            infoBox: false,
+            selectionIndicator: false,
             timeline: false,
             homeButton: true,
             fullscreenButton: true,
             geocoder: false
+        });
+
+        const czmlFilePath = 'frontend/src/assets/simple.czml';
+
+        Cesium.CzmlDataSource.load(czmlFilePath).then(async function (dataSource) {
+            // Add the loaded data source to the viewer
+            viewer.dataSources.add(dataSource).then(console.log);
+
+            // Adjust the viewer's camera to fit the data source
+            await viewer.zoomTo(dataSource);
+        }).catch(function (error) {
+            console.error('Error loading CZML:', error);
         });
 
         setViewer(viewer);
