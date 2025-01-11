@@ -46,6 +46,12 @@ type ECEF struct {
 	Z float64
 }
 
+type SEZ struct {
+	South  float64
+	East   float64
+	Zenith float64
+}
+
 var (
 	DegUnit u.Unit
 	RadUnit u.Unit
@@ -63,7 +69,6 @@ func Init() {
 }
 
 func (a *App) ConvertGeoToDms(geo Geo) Dms {
-	fmt.Println("Convert Geo to Dms")
 	latDeg, latMin, latSec, latDir, latDirection := latLonToDMS(geo.Lat, Latitude)
 	lngDeg, lngMin, lngSec, lngDir, lngDirection := latLonToDMS(geo.Lng, Longitude)
 	return Dms{
@@ -86,7 +91,6 @@ func (a *App) ConvertGeoToDms(geo Geo) Dms {
 
 func (a *App) ConvertDmsToGeo(dms Dms) Geo {
 	latDecimal := float64(dms.LatNS.Deg) + float64(dms.LatNS.Min)/60 + dms.LatNS.Sec/3600
-	fmt.Println(dms)
 	if dms.LatNS.Str == "S" {
 		latDecimal = -latDecimal
 	}
@@ -160,7 +164,6 @@ func (a *App) ConvertDmmToEcef(dmm Dmm) ECEF {
 }
 
 func (a *App) ConvertGeoToECEF(geo Geo) ECEF {
-	fmt.Println(geo)
 	// WGS84 ellipsoid parameters
 	sma := 6378137.0         // Semi-major axis (meters)
 	f := 1.0 / 298.257223563 // Flattening
@@ -260,11 +263,66 @@ func latLonToDMS(degrees float64, geoType GeoCoordinate) (int, int, float64, str
 	minutes := (degAbs - deg) * 60
 	m := math.Floor(minutes)
 	seconds := (minutes - m) * 60
-	sec := seconds
+	sec := math.Round(seconds*1e4) / 1e4
+	if sec == 60 {
+		sec = 0
+		m += 1
+	}
 
+	// Handle edge case where m = 60 due to rounding
+	if m == 60 {
+		m = 0
+		deg += 1
+	}
 	// Format the result as DMS string
-	dmsString := fmt.Sprintf("%d° %d' %f\"%s", int(deg), int(m), sec, direction)
+	dmsString := fmt.Sprintf("%d° %d' %f\" %s", int(deg), int(m), sec, direction)
 
 	// Return both DMS string and the decimal degree (original value)
 	return int(deg), int(m), sec, dmsString, direction
+}
+
+func toRadians(angle float64) float64 {
+	return angle * (math.Pi / 180)
+}
+
+func RAEtoSEZ(distance float64, azimuth float64, elevation float64) SEZ {
+	// Convert to radians
+	azimuth = toRadians(azimuth)
+	elevation = toRadians(elevation)
+
+	//
+	return SEZ{
+		South:  -distance * math.Cos(elevation) * math.Cos(azimuth),
+		East:   distance * math.Cos(elevation) * math.Sin(azimuth),
+		Zenith: distance * math.Sin(elevation),
+	}
+}
+
+func SEZtoECR(siteXYZ ECEF, geo Geo, sez SEZ) ECEF {
+
+	var south = sez.South
+	var east = sez.East
+	var zenith = sez.Zenith
+
+	// Compute needed math
+	slat := math.Sin(toRadians(geo.Lat))
+	slon := math.Sin(toRadians(geo.Lng))
+	clat := math.Cos(toRadians(geo.Lat))
+	clon := math.Cos(toRadians(geo.Lng))
+
+	// Convert
+	return ECEF{
+		X: (slat * clon * south) + (-slon * east) + (clat * clon * zenith) + siteXYZ.X,
+		Y: (slat * slon * south) + (clon * east) + (clat * slon * zenith) + siteXYZ.Y,
+		Z: (-clat * south) + (slat * zenith) + siteXYZ.Z,
+	}
+}
+
+func (a *App) MoveToLocation(geo Geo, az float64, el float64, distance float64) Geo {
+	ecefLoc := a.ConvertGeoToECEF(geo)
+	distance = distance * 1000
+	sez := RAEtoSEZ(distance, az, el)
+	movedEcef := SEZtoECR(ecefLoc, geo, sez)
+
+	return a.ConvertECEFToGeo(movedEcef)
 }

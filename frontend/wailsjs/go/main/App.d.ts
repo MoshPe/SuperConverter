@@ -27,3 +27,5 @@ export function ConvertGeoToDmm(arg1:main.Geo):Promise<main.Dmm>;
 export function ConvertGeoToDms(arg1:main.Geo):Promise<main.Dms>;
 
 export function ConvertGeoToECEF(arg1:main.Geo):Promise<main.ECEF>;
+
+export function MoveToLocation(arg1:main.Geo,arg2:number,arg3:number,arg4:number):Promise<main.Geo>;

@@ -1,13 +1,15 @@
 import makeAnimated from "react-select/animated";
 import {useCallback, useEffect, useState} from "react";
 import {TUnit} from "./types";
-import {Box, Button, Center, Text} from "@chakra-ui/react";
+import {Box, Button, Center, LocaleProvider, Text} from "@chakra-ui/react";
 import Select from "react-select";
 import GeoConvertComponent from "./GeoConvertComponent";
 import DmsConvertComponent from "./DmsConvertComponent";
 import SingleValue from "./SingleValue";
 import EcefConvertComponent from "./EcefConvertComponent";
 import DmmConvertComponent from "./DmmConvertComponent";
+import {MoveToLocation} from "../../wailsjs/go/main/App";
+import LocationProjector from "./LocationProjector";
 
 
 const animatedComponents = makeAnimated();
@@ -19,6 +21,7 @@ const ConverterApp = () => {
     });
 
     const options = [
+        {value: 'move_location', label: 'Move to New Location'},
         {value: 'km', label: 'Kilometers to Miles'},
         {value: 'miles', label: 'Miles to Kilometers'},
         {value: 'rad', label: 'Radians to Degrees'},
@@ -71,6 +74,10 @@ const ConverterApp = () => {
                     <Select onChange={(newValue: any) => setUnit(newValue.value)} styles={customStyles} required={true}
                             components={animatedComponents}
                             options={options}></Select>
+                    {(unit === "move_location") && (
+                        <LocationProjector unit={unit} setResult={setResult}
+                                             setHandleConvert={stableSetHandleConvert}/>
+                    )}
                     {(unit === "geo_dmm" || unit === "geo_ecef" || unit === "geo_dms") && (
                         <GeoConvertComponent unit={unit} setResult={setResult}
                                              setHandleConvert={stableSetHandleConvert}/>

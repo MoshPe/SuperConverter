@@ -66,11 +66,11 @@ export default function GeoConvertComponent(props: ConvertProps) {
             case GeoConvertType.ECEF:
                 geo.Alt = altitude;
                 console.log(geo)
-                convertedValue =  await ConvertGeoToECEF(geo);
+                convertedValue = await ConvertGeoToECEF(geo);
                 props.setResult(`X: ${convertedValue.X}\n Y: ${convertedValue.Y}\n Z: ${convertedValue.Z}`);
                 break;
             case GeoConvertType.DMM:
-                convertedValue =  await ConvertGeoToDmm(geo);
+                convertedValue = await ConvertGeoToDmm(geo);
                 props.setResult(`${convertedValue.LatNS.Str}\n ${convertedValue.LonWE.Str}`);
                 break;
             default:
@@ -79,7 +79,7 @@ export default function GeoConvertComponent(props: ConvertProps) {
         }
 
 
-    }, [latitude, longitude, props.unit]);
+    }, [latitude, longitude, altitude, props.unit]);
 
     useEffect(() => {
         props.setHandleConvert(() => handleConvert);
@@ -123,7 +123,9 @@ export default function GeoConvertComponent(props: ConvertProps) {
                             className={"peer"}
                             color={"black"}
                             placeholder=""
-                            onChange={(e) => setAltitude(parseFloat(e.target.value))}
+                            onChange={(e) =>
+                                setAltitude(parseFloat(e.target.value))
+                            }
                             mb={5}
                             mt={5}
                         />

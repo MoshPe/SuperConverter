@@ -53,3 +53,7 @@ export function ConvertGeoToDms(arg1) {
 export function ConvertGeoToECEF(arg1) {
   return window['go']['main']['App']['ConvertGeoToECEF'](arg1);
 }
+
+export function MoveToLocation(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['MoveToLocation'](arg1, arg2, arg3, arg4);
+}

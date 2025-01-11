@@ -1,9 +1,17 @@
 package main
 
 import (
+	"fmt"
 	u "github.com/bcicen/go-units"
 	"github.com/stretchr/testify/assert"
 	"testing"
+)
+
+const (
+	EarthRadius = 6378.1           // Radius of Earth in km
+	a           = 6378137.0        // Semi-major axis (meters)
+	b           = 6356752.3142     // Semi-minor axis (meters)
+	e2          = 0.00669437999014 // Eccentricity squared
 )
 
 func testConversions(t *testing.T) {
@@ -87,6 +95,34 @@ func TestConvertDmsToGeo(t *testing.T) {
 	geo := app.ConvertDmsToGeo(dms)
 	assert.Equal(t, 47.08733333333333, geo.Lat)
 	assert.Equal(t, 20.689055555555555, geo.Lng)
+}
+
+func TestApp_MoveToLocation(t *testing.T) {
+	app := &App{}
+	lat, lon, alt := 37.7749, -122.4194, 0.0 // San Francisco
+	azimuth, elevation := 0.0, 0.0           // 30° azimuth, 1° elevation
+	distance := 10000.0                      // 10 km
+
+	// Convert initial location to ECEF coordinates
+	ecef := app.ConvertGeoToECEF(Geo{
+		Lat: lat,
+		Lng: lon,
+		Alt: alt,
+	})
+
+	sez := RAEtoSEZ(distance, azimuth, elevation)
+	newEcef := SEZtoECR(ecef, Geo{
+		Lat: lat,
+		Lng: lon,
+		Alt: alt,
+	}, sez)
+
+	geo := app.ConvertECEFToGeo(newEcef)
+
+	// Output the new location
+	fmt.Printf("New location: %f° N, %f° E, Altitude: %f meters\n", geo.Lat, geo.Lng, geo.Alt)
+
+	fmt.Printf("X: %f Y: %f Z: %f\n", newEcef.X, newEcef.Y, newEcef.Z)
 }
 
 //func TestConvertECEFToGeo(t *testing.T) {
