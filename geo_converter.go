@@ -321,6 +321,7 @@ func SEZtoECR(siteXYZ ECEF, geo Geo, sez SEZ) ECEF {
 func (a *App) MoveToLocation(geo Geo, az float64, el float64, distance float64) Geo {
 	ecefLoc := a.ConvertGeoToECEF(geo)
 	distance = distance * 1000
+
 	sez := RAEtoSEZ(distance, az, el)
 	movedEcef := SEZtoECR(ecefLoc, geo, sez)
 

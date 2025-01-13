@@ -33,3 +33,17 @@
 .measure-button:hover {
     background-color: #218838;
 }
+
+.location-reference {
+    position: absolute;
+    display: flex;
+    align-items: flex-start;
+    width: 30%;
+    /*background: white;*/
+    color: white;
+    border-radius: 20px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    left: 10%;
+    top: 13%;
+}

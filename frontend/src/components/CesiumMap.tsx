@@ -1,17 +1,25 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import * as Cesium from "cesium";
 import {Cartesian3, Color, defined, Ray, ScreenSpaceEventHandler, ScreenSpaceEventType, Viewer} from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import './index.d'
 import './CesiumMap.css'
+import LocationProjector from "./LocationProjector";
+import makeAnimated from "react-select/animated";
 
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5MmE4OGNiNS0wNDI3LTQyNzYtOGI3Yy0yMjFjZThmYmQwMzUiLCJpZCI6MjY2NTMwLCJpYXQiOjE3MzU5MDc2MDd9.pBORuv4ekLdb4USMX11EuIMMN50QRTktcnP-_xXafTk';
 window.CESIUM_BASE_URL = './node_modules/cesium/Build/CesiumUnminified/'
+
+const animatedComponents = makeAnimated();
 
 const CesiumMap = () => {
     const [placingMarker, setPlacingMarker] = useState(false); // Track if we're placing a marker}
     const [viewer, setViewer] = useState({} as Viewer);
     const [latLon, setLatLon] = useState({lat: 0, lon: 0});
+    const [result, setResult] = useState<string>("");
+    const [handleConvert, setHandleConvert] = useState<() => void>(() => {
+    });
+    const stableSetHandleConvert = useCallback(setHandleConvert, []);
 
     useEffect(() => {
         // Ensure the DOM is ready before initializing Cesium
@@ -124,6 +132,9 @@ const CesiumMap = () => {
 
     return (
         <div id="CesiumMap">
+            <div className="location-reference">
+                <LocationProjector unit={"move_location"} setHandleConvert={setHandleConvert} setResult={setResult}/>
+            </div>
             <div id="CesiumMapContainer" className="cesiumMapContainer">
                 <div className="cesium-toolbar">
                     <button

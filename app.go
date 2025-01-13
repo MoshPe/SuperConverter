@@ -9,6 +9,8 @@ import (
 var (
 	KM    u.Unit
 	Miles u.Unit
+	Meter u.Unit
+	Foot  u.Unit
 )
 
 // NewApp creates a new App application struct
@@ -22,6 +24,8 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	KM = u.KiloMeter
 	Miles = u.Mile
+	Meter = u.Meter
+	Foot = u.Foot
 	Init()
 }
 
@@ -40,26 +44,6 @@ func (a *App) ConvertDistanceUnit(value float64, unitName string) UnitValue {
 			Val: 0,
 			Str: "",
 		}
-	}
-	if unit.Name == KM.Name {
-		val, err = u.ConvertFloat(value, unit, Miles)
-		if err != nil {
-			fmt.Println("error converting KM to Miles")
-			return UnitValue{
-				Val: 0,
-				Str: "",
-			}
-		}
-	} else if unit.Name == Miles.Name {
-		val, err = u.ConvertFloat(value, unit, KM)
-		if err != nil {
-			fmt.Println("error converting Miles to KM")
-			return UnitValue{
-				Val: 0,
-				Str: "",
-			}
-		}
-	} else if unit.Name == KM.Name {
 	}
 
 	switch unit.Name {
@@ -94,6 +78,24 @@ func (a *App) ConvertDistanceUnit(value float64, unitName string) UnitValue {
 		val, err = u.ConvertFloat(value, unit, RadUnit)
 		if err != nil {
 			fmt.Println("error converting Deg to Rad")
+			return UnitValue{
+				Val: 0,
+				Str: "",
+			}
+		}
+	case Meter.Name:
+		val, err = u.ConvertFloat(value, unit, Foot)
+		if err != nil {
+			fmt.Println("error converting Meter to Foot")
+			return UnitValue{
+				Val: 0,
+				Str: "",
+			}
+		}
+	case Foot.Name:
+		val, err = u.ConvertFloat(value, unit, Meter)
+		if err != nil {
+			fmt.Println("error converting Foot to Meter")
 			return UnitValue{
 				Val: 0,
 				Str: "",

@@ -17,25 +17,27 @@ const animatedComponents = makeAnimated();
 const ConverterApp = () => {
     const [unit, setUnit] = useState<TUnit>("");
     const [result, setResult] = useState<string>("");
-    const [handleConvert, setHandleConvert] = useState<() => void>(() => {
-    });
+    const [handleConvert, setHandleConvert] = useState<() => void>(() => {});
 
     const options = [
-        {value: 'move_location', label: 'Move to New Location'},
+        {value: 'move_location', label: 'Move to New Location', fontWeight: 'bold'},
+        {value: 'geo_dmm', label: 'Geo to Dmm', fontWeight: 'bold'},
+        {value: 'dmm_geo', label: 'Dmm to Geo', fontWeight: 'bold'},
+        {value: 'foot', label: 'Foot to Meter', fontWeight: 'bold'},
+        {value: 'meter', label: 'Meter to Foot', fontWeight: 'bold'},
+        { value: 'separator', label: 'separator', isSeparator: true },
         {value: 'km', label: 'Kilometers to Miles'},
         {value: 'miles', label: 'Miles to Kilometers'},
         {value: 'rad', label: 'Radians to Degrees'},
         {value: 'deg', label: 'Degrees to Radians'},
         {value: 'geo_dms', label: 'Geo to Dms'},
         {value: 'geo_ecef', label: 'Geo to ECEF'},
-        {value: 'geo_dmm', label: 'Geo to Dmm'},
         {value: 'dms_geo', label: 'Dms to Geo'},
         {value: 'dms_ecef', label: 'Dms to ECEF'},
         {value: 'dms_dmm', label: 'Dms to Dmm'},
         {value: 'ecef_geo', label: 'ECEF to Geo'},
         {value: 'ecef_dms', label: 'ECEF to Dms'},
         {value: 'ecef_dmm', label: 'ECEF to Dmm'},
-        {value: 'dmm_geo', label: 'Dmm to Geo'},
         {value: 'dmm_dms', label: 'Dmm to Dms'},
         {value: 'dmm_ecef', label: 'Dmm to ECEF'},
     ]
@@ -43,26 +45,46 @@ const ConverterApp = () => {
     const customStyles = {
         option: (provided: any, state: any) => ({
             ...provided,
-            color: 'black', // Change text color based on selection
-            backgroundColor: state.isSelected ? '#6df110' : provided.backgroundColor, // Background color when selected
+            color: 'black',
+            backgroundColor: state.isSelected ? '#6df110' : provided.backgroundColor,
+            fontWeight: state.data.fontWeight ? 'bold' : 'normal', // Bold font for certain options
             padding: '10px',
+            cursor: state.data.isSeparator ? 'default' : 'pointer', // Prevent hover effect for separators
         }),
         control: (provided: any) => ({
             ...provided,
-            borderColor: '#3182ce', // Border color for the dropdown control
+            borderColor: '#3182ce',
             marginBottom: '10px',
         }),
+        menu: (provided: any) => ({
+            ...provided,
+            zIndex: 5,
+        }),
+    };
+
+    const formatOptionLabel = ({ label, isSeparator }: any) => {
+        if (isSeparator) {
+            return <hr style={{ margin: '5px 0', borderColor: '#ccc' }} />;
+        }
+        return label;
     };
 
     const stableSetHandleConvert = useCallback(setHandleConvert, []);
 
     useEffect(() => {
+        window.addEventListener("keydown", handleEnterKey);
         setHandleConvert(() => {
             return () => {
                 setResult("Please pick a conversion type");
             };
         });
     }, []);
+
+    const handleEnterKey = (event: KeyboardEvent) => {
+        if (event.key === "Enter") {
+            handleConvert();
+        }
+    };
 
     return (
         <div className="home-container">
@@ -73,6 +95,7 @@ const ConverterApp = () => {
                     </Text>
                     <Select onChange={(newValue: any) => setUnit(newValue.value)} styles={customStyles} required={true}
                             components={animatedComponents}
+                            formatOptionLabel={formatOptionLabel}
                             options={options}></Select>
                     {(unit === "move_location") && (
                         <LocationProjector unit={unit} setResult={setResult}
@@ -94,7 +117,7 @@ const ConverterApp = () => {
                         <EcefConvertComponent unit={unit} setResult={setResult}
                                               setHandleConvert={stableSetHandleConvert}/>
                     )}
-                    {(unit === "miles" || unit === "km" || unit === "rad" || unit === "deg") && (
+                    {(unit === "miles" || unit === "km" || unit === "rad" || unit === "deg" || unit === "foot" || unit === "meter") && (
                         <SingleValue unit={unit} setResult={setResult} setHandleConvert={stableSetHandleConvert}/>
 
                     )}

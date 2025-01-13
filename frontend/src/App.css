@@ -8,7 +8,7 @@ button:hover {
 }
 
 .text-shared {
-    color: black;
+    color: inherit;
     text-align: center;
     margin: 4px 0;
 }
