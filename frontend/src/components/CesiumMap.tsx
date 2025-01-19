@@ -8,7 +8,7 @@ import LocationProjector from "./LocationProjector";
 import makeAnimated from "react-select/animated";
 
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5MmE4OGNiNS0wNDI3LTQyNzYtOGI3Yy0yMjFjZThmYmQwMzUiLCJpZCI6MjY2NTMwLCJpYXQiOjE3MzU5MDc2MDd9.pBORuv4ekLdb4USMX11EuIMMN50QRTktcnP-_xXafTk';
-window.CESIUM_BASE_URL = './node_modules/cesium/Build/CesiumUnminified/'
+window.CESIUM_BASE_URL = '/assets/cesium/Build/CesiumUnminified/'
 
 const animatedComponents = makeAnimated();
 
