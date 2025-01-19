@@ -1,5 +1,19 @@
 export namespace main {
 	
+	export class Angle {
+	    Azimuth: number;
+	    Elevation: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Angle(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Azimuth = source["Azimuth"];
+	        this.Elevation = source["Elevation"];
+	    }
+	}
 	export class DmmAngle {
 	    Deg: number;
 	    Min: number;

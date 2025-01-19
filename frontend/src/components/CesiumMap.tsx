@@ -13,164 +13,217 @@ window.CESIUM_BASE_URL = './node_modules/cesium/Build/CesiumUnminified/'
 const animatedComponents = makeAnimated();
 
 const CesiumMap = () => {
-    const [placingMarker, setPlacingMarker] = useState(false); // Track if we're placing a marker}
-    const [viewer, setViewer] = useState({} as Viewer);
-    const [latLon, setLatLon] = useState({lat: 0, lon: 0});
-    const [result, setResult] = useState<string>("");
-    const [handleConvert, setHandleConvert] = useState<() => void>(() => {
-    });
-    const stableSetHandleConvert = useCallback(setHandleConvert, []);
-
-    useEffect(() => {
-        // Ensure the DOM is ready before initializing Cesium
-        const viewer = new Viewer("cesiumContainer", {
-            // Disable the default widgets (including the bottom bar)
-            animation: false,
-            sceneModePicker: false,
-            navigationHelpButton: true,
-            infoBox: false,
-            selectionIndicator: false,
-            timeline: false,
-            homeButton: true,
-            fullscreenButton: true,
-            geocoder: false
+        const [placingMarker, setPlacingMarker] = useState(false); // Track if we're placing a marker}
+        const [viewerInstance, setViewer] = useState({} as Viewer);
+        const [latLon, setLatLon] = useState({lat: 0, lon: 0});
+        const [result, setResult] = useState<string>("");
+        const [datasource, setDatasource] = useState< Cesium.CzmlDataSource | null>(null);
+        const [handleConvert, setHandleConvert] = useState<() => void>(() => {
         });
+        const stableSetHandleConvert = useCallback(setHandleConvert, []);
 
-        const czmlFilePath = 'frontend/src/assets/simple.czml';
 
-        Cesium.CzmlDataSource.load(czmlFilePath).then(async function (dataSource) {
-            // Add the loaded data source to the viewer
-            viewer.dataSources.add(dataSource).then(console.log);
+        useEffect(() => {
+            const czmlFilePath = '/assets/greece_polygon.czml';
 
-            // Adjust the viewer's camera to fit the data source
-            await viewer.zoomTo(dataSource);
-        }).catch(function (error) {
-            console.error('Error loading CZML:', error);
-        });
+            Cesium.CzmlDataSource.load(czmlFilePath)
+                .then(async (loadedDataSource) => {
+                    setDatasource(loadedDataSource);
+                })
+                .catch((error) => {
+                    console.error('Error loading CZML:', error);
+                });
+        }, []);
 
-        setViewer(viewer);
 
-        viewer.homeButton.viewModel.command.beforeExecute.addEventListener((e) => {
-            e.cancel = true;
-            viewer.scene.camera.flyTo({
-                destination: Cartesian3.fromDegrees(35.0297, 31.8078, 400000.0)
+
+
+        useEffect(() => {
+            // Ensure the DOM is ready before initializing Cesium
+            const viewer = new Viewer("cesiumContainer", {
+                creditContainer: document.createElement("div"), // Suppress credits
+                terrainProvider: new Cesium.EllipsoidTerrainProvider(), // Flat terrain
+                animation: false,
+                shouldAnimate: true,
+                sceneModePicker: false,
+                navigationHelpButton: false,
+                selectionIndicator: false,
+                timeline: false,
+                homeButton: true,
+                fullscreenButton: true,
+                geocoder: false,
+                baseLayerPicker: false,
+            });
+
+            viewer.imageryLayers.removeAll();
+            viewer.scene.globe.baseColor = Cesium.Color.BLACK;
+
+
+            // Add stars for a space effect (optional)
+            viewer.scene.skyBox.show = false;
+            viewer.scene.skyAtmosphere.show = false;
+
+            // Cesium.createWorldTerrainAsync().then((result) => viewer.terrainProvider = result);
+            let geojsonFilePath = '/assets/geojson/israel_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLUE,
+                fill: Cesium.Color.CYAN.withAlpha(0.5),
+                strokeWidth: 3
             })
-        })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
 
-        viewer.camera.flyTo({
-            destination: Cartesian3.fromDegrees(35.0297, 31.8078, 400000.0),
-        });
+            geojsonFilePath = '/assets/geojson/greece_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.PINK.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
 
-        const handler = new ScreenSpaceEventHandler(viewer.canvas);
+            geojsonFilePath = '/assets/geojson/italy_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.PINK.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
 
-        handler.setInputAction((movement: any) => {
-            const ray: Ray | undefined = viewer.camera.getPickRay(movement.endPosition);
-            let cartesian = undefined;
-            if (ray) {
-                cartesian = viewer.scene.globe.pick(ray, viewer.scene);
-            }
+            geojsonFilePath = '/assets/geojson/france_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.PINK.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
 
-            if (cartesian) {
-                const cartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
-                const lon = Cesium.Math.toDegrees(cartographic.longitude);
-                const lat = Cesium.Math.toDegrees(cartographic.latitude);
-                setLatLon({lat, lon});
-            }
-        }, ScreenSpaceEventType.MOUSE_MOVE);
+            geojsonFilePath = '/assets/geojson/spain_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.PINK.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
+
+            geojsonFilePath = '/assets/geojson/germany_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.PINK.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
+
+            geojsonFilePath = '/assets/geojson/england_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.PINK.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
 
 
-        return () => {
-            if (viewer && !viewer.isDestroyed()) {
-                viewer.destroy();
-            }
-        };
-    }, []);
 
-    const handlePlaceMarkerClick = () => {
-        setPlacingMarker(true); // Activate marker placement mode
-        document.body.style.cursor = 'crosshair'; // Change the cursor to + (crosshair)
+            viewer.homeButton.viewModel.command.beforeExecute.addEventListener((e) => {
+                e.cancel = true;
+                viewer.scene.camera.flyTo({
+                    destination: Cartesian3.fromDegrees(35.0297, 31.8078, 400000.0)
+                })
+            })
 
-        if (viewer) {
-            const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
-            handler.setInputAction((click: any) => {
-                if (placingMarker) {
-                    const ray = viewer.camera.getPickRay(click.position);
-                    let result: Cartesian3 | undefined = undefined
-                    if (ray) {
-                        result = viewer.scene.globe.pick(ray, viewer.scene);
-                    }
+            viewer.camera.flyTo({
+                destination: Cartesian3.fromDegrees(35.0297, 31.8078, 400000.0),
+            });
 
-                    console.log(result);
+            const handler = new ScreenSpaceEventHandler(viewer.canvas);
 
-                    if (result != undefined && defined(result)) {
-                        // Place a marker at the clicked position
-                        const cartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(result);
-                        const position = Cartesian3.fromRadians(
-                            cartographic.longitude,
-                            cartographic.latitude,
-                            cartographic.height
-                        );
-
-                        viewer.entities.add({
-                            position,
-                            point: {
-                                pixelSize: 10,
-                                color: Color.RED,
-                                outlineColor: Color.WHITE,
-                                outlineWidth: 2,
-                            },
-                        });
-                    }
-
-                    // Reset cursor and mode after placing marker
-                    setPlacingMarker(false);
-                    document.body.style.cursor = 'default'; // Change the cursor back to default
+            handler.setInputAction((movement: any) => {
+                const ray: Ray | undefined = viewer.camera.getPickRay(movement.endPosition);
+                let cartesian = undefined;
+                if (ray) {
+                    cartesian = viewer.scene.globe.pick(ray, viewer.scene);
                 }
-            }, ScreenSpaceEventType.LEFT_CLICK);
-        }
-    };
 
-    return (
-        <div id="CesiumMap">
-            <div className="location-reference">
-                <LocationProjector unit={"move_location"} setHandleConvert={setHandleConvert} setResult={setResult}/>
-            </div>
-            <div id="CesiumMapContainer" className="cesiumMapContainer">
-                <div className="cesium-toolbar">
-                    <button
-                        id="placeMarkerButton"
-                        onClick={handlePlaceMarkerClick}
+                if (cartesian) {
+                    const cartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
+                    const lon = Cesium.Math.toDegrees(cartographic.longitude);
+                    const lat = Cesium.Math.toDegrees(cartographic.latitude);
+                    setLatLon({lat, lon});
+                }
+            }, ScreenSpaceEventType.MOUSE_MOVE);
+
+            setViewer(viewer);
+
+            return () => {
+                if (viewer && !viewer.isDestroyed()) {
+                    viewer.destroy();
+                }
+            };
+        }, [datasource]);
+
+        return (
+            <div id="CesiumMap">
+                <div className="location-reference">
+                    <LocationProjector unit={"move_location"} setHandleConvert={setHandleConvert} setResult={setResult}/>
+                </div>
+                <div id="CesiumMapContainer" className="cesiumMapContainer">
+                    <div id="cesiumContainer" className={"CesiumMap"}></div>
+                    <div
                         style={{
-                            position: 'absolute',
-                            top: '10px',
-                            right: '120px', // Position it near the home button
-                            padding: '10px',
-                            background: 'rgba(0, 0, 0, 0.7)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '5px',
-                            zIndex: '10',
+                            bottom: 10,
+                            color: "white",
+                            padding: "5px",
+                            zIndex: 10,
+                            borderRadius: "5px",
+                            width: "100%"
                         }}
                     >
-                        Place Marker
-                    </button>
-                </div>
-                <div id="cesiumContainer" className={"CesiumMap"}></div>
-                <div
-                    style={{
-                        bottom: 10,
-                        color: "white",
-                        padding: "5px",
-                        zIndex: 10,
-                        borderRadius: "5px",
-                        width: "100%"
-                    }}
-                >
-                    Lat: {latLon.lat.toFixed(4)}°, Lon: {latLon.lon.toFixed(4)}°
+                        Lat: {latLon.lat.toFixed(4)}°, Lon: {latLon.lon.toFixed(4)}°
+                    </div>
                 </div>
             </div>
-        </div>
-    );
-};
+        );
+    }
+;
 
 export default CesiumMap;

@@ -52,6 +52,11 @@ type SEZ struct {
 	Zenith float64
 }
 
+type Angle struct {
+	Azimuth   float64
+	Elevation float64
+}
+
 var (
 	DegUnit u.Unit
 	RadUnit u.Unit
@@ -326,4 +331,84 @@ func (a *App) MoveToLocation(geo Geo, az float64, el float64, distance float64) 
 	movedEcef := SEZtoECR(ecefLoc, geo, sez)
 
 	return a.ConvertECEFToGeo(movedEcef)
+}
+
+func (a *App) CalculateAzimuth(geo1, geo2 Geo) float64 {
+	// Convert degrees to radians
+	lat1 := geo1.Lat * math.Pi / 180.0
+	lon1 := geo1.Lng * math.Pi / 180.0
+	lat2 := geo2.Lat * math.Pi / 180.0
+	lon2 := geo2.Lng * math.Pi / 180.0
+
+	// Calculate the difference in longitudes
+	deltaLon := lon2 - lon1
+
+	// Calculate azimuth using the formula
+	azimuth := math.Atan2(math.Sin(deltaLon)*math.Cos(lat2),
+		math.Cos(lat1)*math.Sin(lat2)-math.Sin(lat1)*math.Cos(lat2)*math.Cos(deltaLon))
+
+	// Convert azimuth from radians to degrees
+	azimuth = azimuth * 180.0 / math.Pi
+
+	// Normalize the azimuth to be between 0 and 360 degrees
+	if azimuth < 0 {
+		azimuth += 360
+	}
+
+	return azimuth
+}
+
+func (a *App) DistanceBetweenTwoPoints(geo1, geo2 Geo) float64 {
+	R := 6371e3 // metres
+
+	φ1 := geo1.Lat * math.Pi / 180 // φ, λ in radians
+	φ2 := geo2.Lat * math.Pi / 180
+	Δφ := (geo2.Lat - geo1.Lat) * math.Pi / 180
+	Δλ := (geo2.Lng - geo1.Lng) * math.Pi / 180
+
+	haversine := math.Sin(Δφ/2)*math.Sin(Δφ/2) +
+		math.Cos(φ1)*math.Cos(φ2)*
+			math.Sin(Δλ/2)*math.Sin(Δλ/2)
+	c := 2 * math.Atan2(math.Sqrt(haversine), math.Sqrt(1-haversine))
+
+	d := R * c // in metres
+
+	return d
+}
+
+func (a *App) CalculateAzimuthAndElevation(geo1, geo2 Geo) Angle {
+	EarthRadius := 6371.0
+
+	// Convert degrees to radians
+	lat1 := geo1.Lat * math.Pi / 180.0
+	lon1 := geo1.Lng * math.Pi / 180.0
+	lat2 := geo2.Lat * math.Pi / 180.0
+	lon2 := geo2.Lng * math.Pi / 180.0
+
+	// Calculate the difference in longitudes
+	deltaLon := lon2 - lon1
+
+	// Azimuth calculation (same as before)
+	azimuth := math.Atan2(math.Sin(deltaLon)*math.Cos(lat2),
+		math.Cos(lat1)*math.Sin(lat2)-math.Sin(lat1)*math.Cos(lat2)*math.Cos(deltaLon))
+
+	// Convert azimuth from radians to degrees
+	azimuth = azimuth * 180.0 / math.Pi
+	if azimuth < 0 {
+		azimuth += 360
+	}
+
+	// Calculate horizontal distance (d_h) using spherical law of cosines
+	d_h := EarthRadius * math.Acos(math.Sin(lat1)*math.Sin(lat2)+math.Cos(lat1)*math.Cos(lat2)*math.Cos(deltaLon))
+
+	// Elevation angle calculation
+	elevation := math.Atan2(geo2.Alt-geo1.Alt, d_h)
+
+	// Convert elevation from radians to degrees
+	elevation = elevation * 180.0 / math.Pi
+
+	return Angle{
+		Azimuth:   azimuth,
+		Elevation: elevation,
+	}
 }

@@ -1,15 +1,16 @@
 import makeAnimated from "react-select/animated";
 import {useCallback, useEffect, useState} from "react";
 import {TUnit} from "./types";
-import {Box, Button, Center, LocaleProvider, Text} from "@chakra-ui/react";
+import {Box, Button, Center, Text} from "@chakra-ui/react";
 import Select from "react-select";
 import GeoConvertComponent from "./GeoConvertComponent";
 import DmsConvertComponent from "./DmsConvertComponent";
 import SingleValue from "./SingleValue";
 import EcefConvertComponent from "./EcefConvertComponent";
 import DmmConvertComponent from "./DmmConvertComponent";
-import {MoveToLocation} from "../../wailsjs/go/main/App";
 import LocationProjector from "./LocationProjector";
+import CalculateBetweenPoints from "./CalculateBetweenPoints";
+import AzElBetweenPoints from "./AzElBetweenPoints";
 
 
 const animatedComponents = makeAnimated();
@@ -17,15 +18,19 @@ const animatedComponents = makeAnimated();
 const ConverterApp = () => {
     const [unit, setUnit] = useState<TUnit>("");
     const [result, setResult] = useState<string>("");
-    const [handleConvert, setHandleConvert] = useState<() => void>(() => {});
+    const [handleConvert, setHandleConvert] = useState<() => void>(() => {
+    });
 
     const options = [
         {value: 'move_location', label: 'Move to New Location', fontWeight: 'bold'},
+        {value: 'az_two_points', label: 'Azimuth between Two Geo points', fontWeight: 'bold'},
+        {value: 'az_el_two_points', label: 'Azimuth and Elevation between Two Geo points', fontWeight: 'bold'},
+        {value: 'distance', label: 'Distance between Two Geo points', fontWeight: 'bold'},
         {value: 'geo_dmm', label: 'Geo to Dmm', fontWeight: 'bold'},
         {value: 'dmm_geo', label: 'Dmm to Geo', fontWeight: 'bold'},
         {value: 'foot', label: 'Foot to Meter', fontWeight: 'bold'},
         {value: 'meter', label: 'Meter to Foot', fontWeight: 'bold'},
-        { value: 'separator', label: 'separator', isSeparator: true },
+        {value: 'separator', label: 'separator', isSeparator: true},
         {value: 'km', label: 'Kilometers to Miles'},
         {value: 'miles', label: 'Miles to Kilometers'},
         {value: 'rad', label: 'Radians to Degrees'},
@@ -62,9 +67,9 @@ const ConverterApp = () => {
         }),
     };
 
-    const formatOptionLabel = ({ label, isSeparator }: any) => {
+    const formatOptionLabel = ({label, isSeparator}: any) => {
         if (isSeparator) {
-            return <hr style={{ margin: '5px 0', borderColor: '#ccc' }} />;
+            return <hr style={{margin: '5px 0', borderColor: '#ccc'}}/>;
         }
         return label;
     };
@@ -97,9 +102,17 @@ const ConverterApp = () => {
                             components={animatedComponents}
                             formatOptionLabel={formatOptionLabel}
                             options={options}></Select>
+                    {(unit === "az_el_two_points") && (
+                        <AzElBetweenPoints unit={unit} setResult={setResult}
+                                           setHandleConvert={stableSetHandleConvert}/>
+                    )}
+                    {(unit === "az_two_points" || unit === "distance") && (
+                        <CalculateBetweenPoints unit={unit} setResult={setResult}
+                                                setHandleConvert={stableSetHandleConvert}/>
+                    )}
                     {(unit === "move_location") && (
                         <LocationProjector unit={unit} setResult={setResult}
-                                             setHandleConvert={stableSetHandleConvert}/>
+                                           setHandleConvert={stableSetHandleConvert}/>
                     )}
                     {(unit === "geo_dmm" || unit === "geo_ecef" || unit === "geo_dms") && (
                         <GeoConvertComponent unit={unit} setResult={setResult}

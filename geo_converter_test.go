@@ -125,6 +125,52 @@ func TestApp_MoveToLocation(t *testing.T) {
 	fmt.Printf("X: %f Y: %f Z: %f\n", newEcef.X, newEcef.Y, newEcef.Z)
 }
 
+func TestApp_CalculateAzimuth(t *testing.T) {
+	app := &App{}
+	geo1 := Geo{
+		Lat: 49.243824,
+		Lng: -121.887340,
+		Alt: 0,
+	}
+	geo2 := Geo{
+		Lat: 49.227648,
+		Lng: -121.89631,
+		Alt: 0,
+	}
+	azimuth := app.CalculateAzimuth(geo1, geo2)
+	fmt.Printf("Azimuth: %f\n", azimuth)
+
+	geo1 = Geo{
+		Lat: 52.2296756,
+		Lng: 21.0122287,
+		Alt: 0,
+	}
+	geo2 = Geo{
+		Lat: 41.8919300,
+		Lng: 12.5113300,
+		Alt: 0,
+	}
+	azimuth = app.CalculateAzimuth(geo1, geo2)
+	fmt.Printf("Azimuth: %f\n", azimuth)
+}
+
+func TestApp_DistanceBetweenTwoPoints(t *testing.T) {
+	app := &App{}
+
+	geo1 := Geo{
+		Lat: 49.243824,
+		Lng: -121.887340,
+		Alt: 0,
+	}
+	geo2 := Geo{
+		Lat: 49.227648,
+		Lng: -121.89631,
+		Alt: 0,
+	}
+	azimuth := app.DistanceBetweenTwoPoints(geo1, geo2)
+	fmt.Printf("Distance: %f meters\n", azimuth)
+}
+
 //func TestConvertECEFToGeo(t *testing.T) {
 //
 //}
