@@ -176,6 +176,62 @@ const CesiumMap = () => {
                     console.error("Error loading GeoJSON:", error);
                 });
 
+            geojsonFilePath = '/assets/geojson/area_c_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.PINK.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
+
+            geojsonFilePath = '/assets/geojson/area_h2_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.PINK.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
+
+            geojsonFilePath = '/assets/geojson/Cyprus_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.PINK.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
+
+            geojsonFilePath = '/assets/geojson/turkey_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.PINK.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
+
             geojsonFilePath = '/assets/geojson/dead_sea_polygon.geojson';
             Cesium.GeoJsonDataSource.load(geojsonFilePath, {
                 stroke: Cesium.Color.BLACK,
