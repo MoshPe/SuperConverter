@@ -162,6 +162,48 @@ const CesiumMap = () => {
                     console.error("Error loading GeoJSON:", error);
                 });
 
+            geojsonFilePath = '/assets/geojson/palestine_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.PINK.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
+
+            geojsonFilePath = '/assets/geojson/dead_sea_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.BLUE.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
+
+            geojsonFilePath = '/assets/geojson/kineret_polygon.geojson';
+            Cesium.GeoJsonDataSource.load(geojsonFilePath, {
+                stroke: Cesium.Color.BLACK,
+                fill: Cesium.Color.BLUE.withAlpha(0.5),
+                strokeWidth: 3
+            })
+                .then((dataSource) => {
+                    viewer.dataSources.add(dataSource); // Add the GeoJSON data source to the viewer
+                    // viewer.flyTo(dataSource); // Fly to the loaded data source
+                })
+                .catch((error) => {
+                    console.error("Error loading GeoJSON:", error);
+                });
+
 
 
             viewer.homeButton.viewModel.command.beforeExecute.addEventListener((e) => {
