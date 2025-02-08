@@ -60,8 +60,8 @@ const CesiumMap = () => {
 
 
             // Add stars for a space effect (optional)
-            viewer.scene.skyBox.show = false;
-            viewer.scene.skyAtmosphere.show = false;
+            viewer.scene.skyBox.show = true;
+            viewer.scene.skyAtmosphere.show = true;
 
             // Cesium.createWorldTerrainAsync().then((result) => viewer.terrainProvider = result);
             let geojsonFilePath = '/assets/geojson/israel_polygon.geojson';
