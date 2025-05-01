@@ -40,6 +40,12 @@ type Dmm struct {
 	LonWE DmmAngle
 }
 
+type DmmFoot struct {
+	LatNS DmmAngle
+	LonWE DmmAngle
+	Foot  float64
+}
+
 type ECEF struct {
 	X float64
 	Y float64
@@ -323,14 +329,20 @@ func SEZtoECR(siteXYZ ECEF, geo Geo, sez SEZ) ECEF {
 	}
 }
 
-func (a *App) MoveToLocation(geo Geo, az float64, el float64, distance float64) Geo {
+func (a *App) MoveToLocation(geo Geo, az float64, el float64, distance float64) DmmFoot {
 	ecefLoc := a.ConvertGeoToECEF(geo)
 	distance = distance * 1000
 
 	sez := RAEtoSEZ(distance, az, el)
 	movedEcef := SEZtoECR(ecefLoc, geo, sez)
 
-	return a.ConvertECEFToGeo(movedEcef)
+	movedGeo := a.ConvertECEFToGeo(movedEcef)
+	movedDmm := a.ConvertGeoToDmm(movedGeo)
+	return DmmFoot{
+		LatNS: movedDmm.LatNS,
+		LonWE: movedDmm.LonWE,
+		Foot:  a.ConvertDistanceUnit(movedGeo.Alt, "foot").Val,
+	}
 }
 
 func (a *App) CalculateAzimuth(geo1, geo2 Geo) float64 {

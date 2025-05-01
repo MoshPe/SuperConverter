@@ -34,4 +34,4 @@ export function ConvertGeoToECEF(arg1:main.Geo):Promise<main.ECEF>;
 
 export function DistanceBetweenTwoPoints(arg1:main.Geo,arg2:main.Geo):Promise<number>;
 
-export function MoveToLocation(arg1:main.Geo,arg2:number,arg3:number,arg4:number):Promise<main.Geo>;
+export function MoveToLocation(arg1:main.Geo,arg2:number,arg3:number,arg4:number):Promise<main.DmmFoot>;

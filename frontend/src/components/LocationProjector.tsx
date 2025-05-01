@@ -4,6 +4,7 @@ import './GeoConvertComponent.css'
 import {ConvertProps} from "./types";
 import {main} from "../../wailsjs/go/models";
 import Geo = main.Geo;
+import DmmFoot = main.DmmFoot;
 import {MoveToLocation} from "../../wailsjs/go/main/App";
 
 
@@ -50,10 +51,10 @@ export default function LocationProjector(props: ConvertProps) {
             Lng: longitude,
         });
 
-        let convertedValue: Geo;
+        let convertedValue: DmmFoot;
         console.log(`Geo ${JSON.stringify(geo)} az ${az} el ${el} distance ${distance}`)
         convertedValue = await MoveToLocation(geo, az, el, distance)
-        props.setResult(`Latitude: ${convertedValue.Lat}\n Longitude: ${convertedValue.Lng}\n Altitude: ${convertedValue.Alt}`);
+        props.setResult(`${convertedValue.LatNS.Str}\n ${convertedValue.LonWE.Str}\n Foot: ${convertedValue.Foot}`);
 
     }, [latitude, longitude, altitude, az, el, distance, props.unit]);
 
