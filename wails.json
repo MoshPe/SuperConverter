@@ -13,5 +13,10 @@
   "build": {
     "frontend:dir": "frontend/dist",
     "output:dir": "build/bin"
+  },
+  "assetserver": {
+    "directory": "./map-server",
+    "serveBind": "",
+    "urlPrefix": "/"
   }
 }
