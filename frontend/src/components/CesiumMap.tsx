@@ -5,7 +5,7 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 import './index.d'
 import './CesiumMap.css'
 import {Box, Button, Center, defineStyle, Field, Input, InputElement, Text} from "@chakra-ui/react";
-import {ConvertDistanceUnit, ConvertDmmToGeo, MoveToLocation} from "../../wailsjs/go/main/App";
+import {ConvertDistanceUnit, ConvertDmmToGeo, ConvertGeoToDmm, MoveToLocation} from "../../wailsjs/go/main/App";
 import {main} from "../../wailsjs/go/models";
 import Geo = main.Geo;
 import DmmFoot = main.DmmFoot;
@@ -227,27 +227,24 @@ const CesiumMap = () => {
                 Lng: longitude,
             });
 
-            let convertedValue: DmmFoot;
             console.log(`Geo ${JSON.stringify(geo)} az ${az} el ${el} distance ${distance}`)
-            convertedValue = await MoveToLocation(geo, az, el, distance)
-            setResult(`${convertedValue.LatNS.Str}\n ${convertedValue.LonWE.Str}\n Foot: ${convertedValue.Foot}`);
-            await setSecondPoint(convertedValue);
+            let newValue = calculateSecondPoint();
+            let convertedValue = await ConvertGeoToDmm(Geo.createFrom({
+                Lat: newValue.latitude,
+                Lng: newValue.longitude,
+                Alt: newValue.altitude
+            }))
+
+            let convertMeterToFoot = await ConvertDistanceUnit(newValue.altitude, "meter");
+            setResult(`${convertedValue.LatNS.Str}\n ${convertedValue.LonWE.Str}\n Foot: ${convertMeterToFoot.Val}`);
+            await setSecondPoint(newValue);
         }, [latitude, longitude, altitude, az, el, distance]);
 
-        const setSecondPoint = async (secondPointDmmFoot: DmmFoot) => {
+        const setSecondPoint = async (newValue: { latitude: any; longitude: any; altitude: any; }) => {
             if (!viewerRef.current) return;
 
             const viewer = viewerRef.current;
 
-            let convertedGeoValue = await ConvertDmmToGeo(Dmm.createFrom({
-                LatNS: secondPointDmmFoot.LatNS,
-                LonWE: secondPointDmmFoot.LonWE
-            }))
-
-            let convertedMeterValue = await ConvertDistanceUnit(secondPointDmmFoot.Foot, "foot");
-
-
-            let newValue = calculateSecondPoint();
             const position = Cartesian3.fromDegrees(newValue.longitude, newValue.latitude, newValue.altitude);
 
             if (secondMarkerRef.current) {
